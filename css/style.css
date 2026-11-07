@@ -1,0 +1,786 @@
+/* ==========================================================================
+   ÖZEL YENİ SEKME (NEW TAB) - STİL SAYFASI
+   Glassmorphism, Modern Tipografi ve Akıcı Geçişler
+   ========================================================================== */
+
+:root {
+  --overlay-opacity: 0.35;
+  --blur-amount: 0px;
+
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-bg-hover: rgba(255, 255, 255, 0.18);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-border-hover: rgba(255, 255, 255, 0.3);
+
+  --text-main: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  --text-muted: rgba(255, 255, 255, 0.6);
+
+  --accent-color: #4a90e2;
+  --accent-hover: #357abd;
+  --danger-color: #ff5252;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: #0f1015;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.5rem 3rem;
+  user-select: none;
+}
+
+/* ==========================================================================
+   ARKA PLAN KATMANLARI
+   ========================================================================== */
+.bg-layer {
+  position: fixed;
+  inset: -20px;
+  z-index: -2;
+  background: radial-gradient(circle at 20% 20%, #1e1e38 0%, #0d0f18 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(var(--blur-amount));
+  transform: scale(1.03);
+  transition: background 0.4s ease, filter 0.3s ease;
+}
+
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: rgba(0, 0, 0, var(--overlay-opacity));
+  transition: background-color 0.2s ease;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   ÜST BÖLÜM: SAAT
+   ========================================================================== */
+.top-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 1.5rem;
+  text-align: center;
+}
+
+.clock-container {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  color: var(--text-main);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.clock-time {
+  font-size: clamp(4.5rem, 10vw, 7.5rem);
+  font-weight: 200;
+  letter-spacing: -2px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-seconds {
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 300;
+  opacity: 0.75;
+  margin-left: 0.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-period {
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  font-weight: 400;
+  opacity: 0.75;
+  margin-left: 0.6rem;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   ORTA BÖLÜM: ARAMA VE HIZLI ERİŞİM
+   ========================================================================== */
+.center-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 740px;
+  margin: 1.5rem auto;
+}
+
+/* Google Arama Çubuğu */
+.search-container {
+  width: 100%;
+  margin-bottom: 2.2rem;
+}
+
+.search-form {
+  width: 100%;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 56px;
+  padding: 0 1.25rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.search-box:hover,
+.search-box:focus-within {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.search-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.85rem;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.google-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 1.08rem;
+  color: var(--text-main);
+  user-select: text;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.search-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.search-clear-btn.visible {
+  display: flex;
+}
+
+.search-clear-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Hızlı Erişim Linkleri Izgarası */
+.shortcuts-container {
+  width: 100%;
+}
+
+.shortcuts-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.shortcut-tile {
+  position: relative;
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+
+.shortcut-tile:hover {
+  transform: translateY(-4px);
+}
+
+.shortcut-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-main);
+  width: 100%;
+}
+
+.shortcut-icon-wrapper {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.6rem;
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.shortcut-tile:hover .shortcut-icon-wrapper {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+}
+
+.shortcut-favicon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.shortcut-fallback-badge {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.shortcut-title {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 90px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+/* Kısayol Düzenleme / Silme Menüsü */
+.shortcut-actions {
+  position: absolute;
+  top: -4px;
+  right: 6px;
+  display: none;
+  gap: 3px;
+  background: rgba(18, 20, 26, 0.92);
+  border-radius: 20px;
+  padding: 2px 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 10;
+}
+
+.shortcut-tile:hover .shortcut-actions {
+  display: flex;
+}
+
+.shortcut-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.shortcut-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.shortcut-btn.delete-btn:hover {
+  color: var(--danger-color);
+}
+
+/* Kısayol Ekle Buton Kutusu */
+.add-shortcut-tile {
+  outline: none;
+}
+
+.add-icon-wrapper {
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+  color: var(--text-secondary);
+}
+
+.add-shortcut-tile:hover .add-icon-wrapper {
+  border-style: solid;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   ALT BÖLÜM: TARİH (SOL) VE ÖZELLEŞTİR BUTONU (SAĞ)
+   ========================================================================== */
+.bottom-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.date-display {
+  font-size: 1.12rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.3px;
+}
+
+.customize-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 1.15rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.customize-btn:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ==========================================================================
+   ÖZELLEŞTİRME ÇEKMECESİ (DRAWER)
+   ========================================================================== */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 99;
+}
+
+.drawer-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.customize-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  max-width: 92vw;
+  height: 100vh;
+  background: rgba(18, 20, 28, 0.88);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.customize-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.drawer-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.close-drawer-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.close-drawer-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.drawer-section h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* Yükleme Bölgesi */
+.upload-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.6rem 1rem;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.upload-drop-zone:hover,
+.upload-drop-zone.dragover {
+  border-color: var(--accent-color);
+  background: rgba(74, 144, 226, 0.08);
+}
+
+.upload-drop-zone svg {
+  color: var(--text-secondary);
+}
+
+.upload-text {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.upload-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.danger-btn-outline {
+  padding: 0.55rem 1rem;
+  background: transparent;
+  border: 1px solid rgba(255, 82, 82, 0.4);
+  color: #ff7b7b;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.danger-btn-outline:hover {
+  background: rgba(255, 82, 82, 0.15);
+  border-color: var(--danger-color);
+}
+
+/* Hazır Gradyan Izgarası */
+.preset-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.preset-item-btn {
+  height: 52px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.preset-item-btn:hover {
+  transform: scale(1.04);
+}
+
+.preset-item-btn.active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+/* Sürgüler ve Toggle Anahtarları */
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.setting-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent-color);
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+  cursor: pointer;
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-bottom: 0.4rem;
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-round {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.slider-round::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider-round {
+  background-color: var(--accent-color);
+}
+
+input:checked + .slider-round::before {
+  transform: translateX(20px);
+}
+
+/* ==========================================================================
+   MODAL / DIALOG (KISAYOL EKLE & DÜZENLE)
+   ========================================================================== */
+dialog {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: auto;
+  max-width: 90vw;
+  width: 420px;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+}
+
+.dialog-card {
+  background: rgba(24, 27, 36, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  padding: 1.8rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dialog-card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.form-group input {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.form-group input:focus {
+  border-color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn-secondary {
+  padding: 0.65rem 1.1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.btn-primary {
+  padding: 0.65rem 1.25rem;
+  background: var(--accent-color);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+/* ==========================================================================
+   RESPONSIVE UYARLAMALAR
+   ========================================================================== */
+@media (max-width: 640px) {
+  body {
+    padding: 1.5rem;
+  }
+
+  .shortcuts-grid {
+    gap: 0.75rem;
+  }
+
+  .shortcut-tile {
+    width: 80px;
+  }
+
+  .shortcut-icon-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+
+  .bottom-section {
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 1rem;
+  }
+}
