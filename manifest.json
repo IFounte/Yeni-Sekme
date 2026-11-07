@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Özel Yeni Sekme",
+  "version": "1.0.0",
+  "description": "Kişiselleştirilebilir modern yeni sekme sayfası. Hızlı arama, saat, tarih ve favori linkler.",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "storage"
+  ]
+}
