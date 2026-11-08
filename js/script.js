@@ -117,7 +117,61 @@
     };
 
     // ========================================
-    // LocalStorage Helpers
+    // IndexedDB for Persistent Background Images (Unlimited storage)
+    // ========================================
+    const DB_NAME = 'ZenTabCustomDB';
+    const DB_STORE = 'customBgStore';
+
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = () => req.result.createObjectStore(DB_STORE);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    async function saveBgImageToDB(dataUrl) {
+        try {
+            const db = await openDB();
+            const tx = db.transaction(DB_STORE, 'readwrite');
+            tx.objectStore(DB_STORE).put(dataUrl, 'savedWallpaper');
+            return new Promise((res, rej) => {
+                tx.oncomplete = () => res();
+                tx.onerror = () => rej(tx.error);
+            });
+        } catch (e) {
+            console.error('Error saving image to IndexedDB:', e);
+        }
+    }
+
+    async function loadBgImageFromDB() {
+        try {
+            const db = await openDB();
+            const tx = db.transaction(DB_STORE, 'readonly');
+            const req = tx.objectStore(DB_STORE).get('savedWallpaper');
+            return new Promise((res, rej) => {
+                req.onsuccess = () => res(req.result || null);
+                req.onerror = () => rej(req.error);
+            });
+        } catch (e) {
+            console.error('Error loading image from IndexedDB:', e);
+            return null;
+        }
+    }
+
+    async function clearBgImageFromDB() {
+        try {
+            const db = await openDB();
+            const tx = db.transaction(DB_STORE, 'readwrite');
+            tx.objectStore(DB_STORE).delete('savedWallpaper');
+        } catch (e) {
+            console.error('Error clearing image from IndexedDB:', e);
+        }
+    }
+
+    // ========================================
+    // LocalStorage Helpers (Configuration)
     // ========================================
     function loadSettings() {
         try {
@@ -130,9 +184,12 @@
 
     function saveSettings() {
         try {
-            localStorage.setItem('newTabSettings', JSON.stringify(settings));
+            // Keep background image in IndexedDB to avoid exceeding localStorage 5MB quota
+            const settingsToSave = { ...settings };
+            delete settingsToSave.bgImage;
+            localStorage.setItem('newTabSettings', JSON.stringify(settingsToSave));
         } catch (e) {
-            console.warn('Settings could not be saved:', e);
+            console.warn('Settings could not be saved to localStorage:', e);
         }
     }
 
@@ -356,9 +413,10 @@
     // ========================================
     function applyBackground() {
         const blurVal = settings.bgBlur || 0;
+        document.documentElement.style.setProperty('--bg-blur', `${blurVal}px`);
         DOM.bgOverlay.style.display = 'block';
-        DOM.bgOverlay.style.filter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
-        DOM.bgOverlay.style.transform = blurVal > 0 ? 'scale(1.08)' : 'none';
+        DOM.bgOverlay.style.filter = 'none';
+        DOM.bgOverlay.style.transform = 'none';
 
         if (settings.bgType === 'solid') {
             DOM.body.style.background = settings.bgColor;
@@ -467,6 +525,9 @@
             $('#bg-preview-img').src = settings.bgImage;
             $('#bg-image-preview').classList.remove('hidden');
             $('#file-upload-area').classList.add('hidden');
+        } else {
+            $('#bg-image-preview').classList.add('hidden');
+            $('#file-upload-area').classList.remove('hidden');
         }
 
         // Sizes
@@ -690,27 +751,33 @@
             saveSettings();
         });
 
-        // Background image
+        // Background image processing with IndexedDB persistence
+        const uploadArea = $('#file-upload-area');
+
+        function processBgImage(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const dataUrl = ev.target.result;
+                settings.bgImage = dataUrl;
+                settings.bgType = 'image';
+                setBgTypeActive('image');
+                $('#bg-preview-img').src = dataUrl;
+                $('#bg-image-preview').classList.remove('hidden');
+                uploadArea.classList.add('hidden');
+                applyBackground();
+                saveSettings();
+                await saveBgImageToDB(dataUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+
         $('#bg-image-input').addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    settings.bgImage = ev.target.result;
-                    settings.bgType = 'image';
-                    setBgTypeActive('image');
-                    $('#bg-preview-img').src = ev.target.result;
-                    $('#bg-image-preview').classList.remove('hidden');
-                    $('#file-upload-area').classList.add('hidden');
-                    applyBackground();
-                    saveSettings();
-                };
-                reader.readAsDataURL(file);
-            }
+            if (file) processBgImage(file);
         });
 
         // Drag and drop
-        const uploadArea = $('#file-upload-area');
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.style.borderColor = 'var(--accent-color)';
@@ -727,31 +794,19 @@
             uploadArea.style.borderColor = '';
             uploadArea.style.background = '';
             const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    settings.bgImage = ev.target.result;
-                    settings.bgType = 'image';
-                    setBgTypeActive('image');
-                    $('#bg-preview-img').src = ev.target.result;
-                    $('#bg-image-preview').classList.remove('hidden');
-                    uploadArea.classList.add('hidden');
-                    applyBackground();
-                    saveSettings();
-                };
-                reader.readAsDataURL(file);
-            }
+            if (file) processBgImage(file);
         });
 
-        $('#remove-bg-image').addEventListener('click', () => {
+        $('#remove-bg-image').addEventListener('click', async () => {
             settings.bgImage = null;
             settings.bgType = 'solid';
             setBgTypeActive('solid');
             $('#bg-image-preview').classList.add('hidden');
-            $('#file-upload-area').classList.remove('hidden');
+            uploadArea.classList.remove('hidden');
             $('#bg-image-input').value = '';
             applyBackground();
             saveSettings();
+            await clearBgImageFromDB();
         });
 
         $('#bg-image-opacity').addEventListener('input', (e) => {
@@ -912,12 +967,30 @@
         });
 
         // Reset all
-        $('#reset-all-btn').addEventListener('click', () => {
+        $('#reset-all-btn').addEventListener('click', async () => {
             if (confirm('Tüm ayarlar sıfırlanacak. Emin misiniz?')) {
                 localStorage.removeItem('newTabSettings');
+                await clearBgImageFromDB();
                 settings = { ...DEFAULTS };
                 applyAllSettings();
                 populateSettingsPanel();
+            }
+        });
+
+        // Right edge detection for settings button
+        let settingsTimeout = null;
+        document.addEventListener('mousemove', (e) => {
+            const isNearRightEdge = e.clientX >= (window.innerWidth - 100);
+            if (isNearRightEdge || (DOM.settingsBtn && DOM.settingsBtn.matches(':hover'))) {
+                if (DOM.settingsBtn) DOM.settingsBtn.classList.add('visible');
+                if (settingsTimeout) clearTimeout(settingsTimeout);
+            } else {
+                if (settingsTimeout) clearTimeout(settingsTimeout);
+                settingsTimeout = setTimeout(() => {
+                    if (DOM.settingsBtn && !DOM.settingsBtn.matches(':hover')) {
+                        DOM.settingsBtn.classList.remove('visible');
+                    }
+                }, 350);
             }
         });
 
@@ -1005,8 +1078,19 @@
     // ========================================
     // Initialize
     // ========================================
-    function init() {
+    async function init() {
         loadSettings();
+
+        // Load custom background image from IndexedDB
+        try {
+            const savedImage = await loadBgImageFromDB();
+            if (savedImage) {
+                settings.bgImage = savedImage;
+            }
+        } catch (e) {
+            console.warn('Could not load background image from IndexedDB:', e);
+        }
+
         applyAllSettings();
         startClock();
         setupEventListeners();
