@@ -176,9 +176,13 @@
     function loadSettings() {
         try {
             const saved = localStorage.getItem('newTabSettings');
-            settings = saved ? { ...DEFAULTS, ...JSON.parse(saved) } : { ...DEFAULTS };
+            const parsed = saved ? JSON.parse(saved) : {};
+            settings = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), parsed);
+            if (!Array.isArray(settings.quickLinks)) {
+                settings.quickLinks = [];
+            }
         } catch {
-            settings = { ...DEFAULTS };
+            settings = JSON.parse(JSON.stringify(DEFAULTS));
         }
     }
 
@@ -400,8 +404,19 @@
             nameSpan.textContent = link.name;
 
             const editBtn = document.createElement('button');
+            editBtn.type = 'button';
             editBtn.className = 'quick-link-edit';
+            editBtn.title = 'Düzenle';
+            editBtn.draggable = false;
             editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+            
+            // Prevent drag triggers so clicking edit never drags the card
+            editBtn.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+            editBtn.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
             editBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -459,23 +474,34 @@
     function updateMoveButtons(index) {
         const leftBtn = $('#move-link-left-btn');
         const rightBtn = $('#move-link-right-btn');
+        const total = (settings.quickLinks && settings.quickLinks.length) || 0;
         if (leftBtn) {
-            leftBtn.disabled = (index <= 0);
-            leftBtn.style.opacity = (index <= 0) ? '0.35' : '1';
-            leftBtn.style.pointerEvents = (index <= 0) ? 'none' : 'auto';
+            const isFirst = (index <= 0);
+            leftBtn.disabled = isFirst;
+            leftBtn.style.opacity = isFirst ? '0.4' : '1';
+            leftBtn.style.cursor = isFirst ? 'not-allowed' : 'pointer';
         }
         if (rightBtn) {
-            rightBtn.disabled = (index >= settings.quickLinks.length - 1);
-            rightBtn.style.opacity = (index >= settings.quickLinks.length - 1) ? '0.35' : '1';
-            rightBtn.style.pointerEvents = (index >= settings.quickLinks.length - 1) ? 'none' : 'auto';
+            const isLast = (index >= total - 1);
+            rightBtn.disabled = isLast;
+            rightBtn.style.opacity = isLast ? '0.4' : '1';
+            rightBtn.style.cursor = isLast ? 'not-allowed' : 'pointer';
         }
     }
 
     function openEditLinkModal(index) {
+        index = parseInt(index);
+        if (isNaN(index) || !settings.quickLinks || !settings.quickLinks[index]) {
+            console.warn('Geçersiz link indeksi:', index);
+            return;
+        }
         const link = settings.quickLinks[index];
-        $('#edit-link-name').value = link.name;
-        $('#edit-link-url').value = link.url;
-        $('#edit-link-index').value = index;
+        const nameInput = $('#edit-link-name');
+        const urlInput = $('#edit-link-url');
+        const indexInput = $('#edit-link-index');
+        if (nameInput) nameInput.value = link.name || '';
+        if (urlInput) urlInput.value = link.url || '';
+        if (indexInput) indexInput.value = index;
         updateMoveButtons(index);
         openModal('edit-link-modal');
     }
@@ -577,112 +603,134 @@
     // Populate Settings Panel
     // ========================================
     function populateSettingsPanel() {
-        // Background
-        setBgTypeActive(settings.bgType);
-        $('#bg-color').value = settings.bgColor;
-        $('#bg-color-text').value = settings.bgColor;
-        $('#gradient-start').value = settings.gradientStart;
-        $('#gradient-start-text').value = settings.gradientStart;
-        $('#gradient-end').value = settings.gradientEnd;
-        $('#gradient-end-text').value = settings.gradientEnd;
-        $('#gradient-direction').value = settings.gradientDirection;
-        $('#bg-image-opacity').value = settings.bgImageOpacity;
-        $('#bg-image-opacity-value').textContent = settings.bgImageOpacity + '%';
-        if ($('#bg-blur')) {
-            $('#bg-blur').value = settings.bgBlur || 0;
-            $('#bg-blur-value').textContent = (settings.bgBlur || 0) + 'px';
-        }
+        try {
+            // Background
+            setBgTypeActive(settings.bgType || 'solid');
+            
+            const bgColor = settings.bgColor || '#0a0a1a';
+            if ($('#bg-color')) $('#bg-color').value = bgColor;
+            if ($('#bg-color-text')) $('#bg-color-text').value = bgColor;
+            
+            const gradStart = settings.gradientStart || '#0a0a1a';
+            if ($('#gradient-start')) $('#gradient-start').value = gradStart;
+            if ($('#gradient-start-text')) $('#gradient-start-text').value = gradStart;
+            
+            const gradEnd = settings.gradientEnd || '#1a1a3e';
+            if ($('#gradient-end')) $('#gradient-end').value = gradEnd;
+            if ($('#gradient-end-text')) $('#gradient-end-text').value = gradEnd;
+            
+            if ($('#gradient-direction')) $('#gradient-direction').value = settings.gradientDirection || 'to bottom';
+            
+            const bgOpacity = settings.bgImageOpacity ?? 100;
+            if ($('#bg-image-opacity')) $('#bg-image-opacity').value = bgOpacity;
+            if ($('#bg-image-opacity-value')) $('#bg-image-opacity-value').textContent = bgOpacity + '%';
+            
+            const bgBlur = settings.bgBlur || 0;
+            if ($('#bg-blur')) $('#bg-blur').value = bgBlur;
+            if ($('#bg-blur-value')) $('#bg-blur-value').textContent = bgBlur + 'px';
 
-        if (settings.bgImage) {
-            $('#bg-preview-img').src = settings.bgImage;
-            $('#bg-image-preview').classList.remove('hidden');
-            $('#file-upload-area').classList.add('hidden');
-        } else {
-            $('#bg-image-preview').classList.add('hidden');
-            $('#file-upload-area').classList.remove('hidden');
-        }
-
-        // Sizes
-        if ($('#clock-size')) {
-            $('#clock-size').value = settings.clockSize || 96;
-            $('#clock-size-value').textContent = (settings.clockSize || 96) + 'px';
-        }
-        if ($('#greeting-size')) {
-            $('#greeting-size').value = settings.greetingSize || 20;
-            $('#greeting-size-value').textContent = (settings.greetingSize || 20) + 'px';
-        }
-        if ($('#search-scale')) {
-            $('#search-scale').value = settings.searchScale || 100;
-            $('#search-scale-value').textContent = '%' + (settings.searchScale || 100);
-        }
-        if ($('#search-width')) {
-            $('#search-width').value = settings.searchWidth || 560;
-            $('#search-width-value').textContent = (settings.searchWidth || 560) + 'px';
-        }
-        if ($('#links-scale')) {
-            $('#links-scale').value = settings.linksScale || 100;
-            $('#links-scale-value').textContent = '%' + (settings.linksScale || 100);
-        }
-        if ($('#date-size')) {
-            $('#date-size').value = settings.dateSize || 15;
-            $('#date-size-value').textContent = (settings.dateSize || 15) + 'px';
-        }
-
-        // Font
-        $('#font-family').value = settings.fontFamily;
-        $('#clock-weight').value = settings.clockWeight;
-        $('#show-greeting').checked = settings.showGreeting;
-        $('#time-format-24').checked = settings.timeFormat24;
-        $('#show-seconds').checked = settings.showSeconds;
-
-        // Colors
-        const colorFields = [
-            ['clock-color', 'clockColor'],
-            ['greeting-color', 'greetingColor'],
-            ['search-bg-color', 'searchBgColor'],
-            ['search-border-color', 'searchBorderColor'],
-            ['search-text-color', 'searchTextColor'],
-            ['link-bg-color', 'linkBgColor'],
-            ['link-text-color', 'linkTextColor'],
-            ['date-color', 'dateColor'],
-            ['accent-color', 'accentColor'],
-        ];
-
-        colorFields.forEach(([id, key]) => {
-            $(`#${id}`).value = settings[key];
-            $(`#${id}-text`).value = settings[key];
-        });
-
-        // Positions
-        const posConfigs = [
-            ['clock-vertical', 'clockVertical', 28, '%'],
-            ['clock-horizontal', 'clockHorizontal', 50, '%'],
-            ['search-vertical', 'searchVertical', 48, '%'],
-            ['search-horizontal', 'searchHorizontal', 50, '%'],
-            ['links-vertical', 'linksVertical', 64, '%'],
-            ['links-horizontal', 'linksHorizontal', 50, '%'],
-            ['date-vertical', 'dateVertical', 95, '%'],
-            ['date-horizontal', 'dateHorizontal', 8, '%'],
-        ];
-
-        posConfigs.forEach(([id, key, defaultVal, unit]) => {
-            const el = $(`#${id}`);
-            const valEl = $(`#${id}-value`);
-            if (el) {
-                const val = settings[key] ?? defaultVal;
-                el.value = val;
-                if (valEl) valEl.textContent = val + unit;
+            const previewImg = $('#bg-preview-img');
+            const previewDiv = $('#bg-image-preview');
+            const uploadArea = $('#file-upload-area');
+            if (settings.bgImage && previewImg && previewDiv && uploadArea) {
+                previewImg.src = settings.bgImage;
+                previewDiv.classList.remove('hidden');
+                uploadArea.classList.add('hidden');
+            } else if (previewDiv && uploadArea) {
+                previewDiv.classList.add('hidden');
+                uploadArea.classList.remove('hidden');
             }
-        });
 
-        $('#show-date').checked = settings.showDate;
+            // Sizes
+            if ($('#clock-size')) {
+                $('#clock-size').value = settings.clockSize || 96;
+                $('#clock-size-value').textContent = (settings.clockSize || 96) + 'px';
+            }
+            if ($('#greeting-size')) {
+                $('#greeting-size').value = settings.greetingSize || 20;
+                $('#greeting-size-value').textContent = (settings.greetingSize || 20) + 'px';
+            }
+            if ($('#search-scale')) {
+                $('#search-scale').value = settings.searchScale || 100;
+                $('#search-scale-value').textContent = '%' + (settings.searchScale || 100);
+            }
+            if ($('#search-width')) {
+                $('#search-width').value = settings.searchWidth || 560;
+                $('#search-width-value').textContent = (settings.searchWidth || 560) + 'px';
+            }
+            if ($('#links-scale')) {
+                $('#links-scale').value = settings.linksScale || 100;
+                $('#links-scale-value').textContent = '%' + (settings.linksScale || 100);
+            }
+            if ($('#date-size')) {
+                $('#date-size').value = settings.dateSize || 15;
+                $('#date-size-value').textContent = (settings.dateSize || 15) + 'px';
+            }
+
+            // Font
+            if ($('#font-family')) $('#font-family').value = settings.fontFamily || "'Inter', sans-serif";
+            if ($('#clock-weight')) $('#clock-weight').value = settings.clockWeight || '600';
+            if ($('#show-greeting')) $('#show-greeting').checked = settings.showGreeting ?? true;
+            if ($('#time-format-24')) $('#time-format-24').checked = settings.timeFormat24 ?? true;
+            if ($('#show-seconds')) $('#show-seconds').checked = settings.showSeconds ?? false;
+
+            // Colors
+            const colorFields = [
+                ['clock-color', 'clockColor', '#ffffff'],
+                ['greeting-color', 'greetingColor', '#a0a0b8'],
+                ['search-bg-color', 'searchBgColor', '#1a1a2e'],
+                ['search-border-color', 'searchBorderColor', '#2a2a4a'],
+                ['search-text-color', 'searchTextColor', '#e0e0e8'],
+                ['link-bg-color', 'linkBgColor', '#1a1a2e'],
+                ['link-text-color', 'linkTextColor', '#c0c0d0'],
+                ['date-color', 'dateColor', '#a0a0b8'],
+                ['accent-color', 'accentColor', '#6c63ff'],
+            ];
+
+            colorFields.forEach(([id, key, defaultColor]) => {
+                const val = settings[key] || defaultColor;
+                const cInput = $(`#${id}`);
+                const tInput = $(`#${id}-text`);
+                if (cInput) cInput.value = val;
+                if (tInput) tInput.value = val;
+            });
+
+            // Positions
+            const posConfigs = [
+                ['clock-vertical', 'clockVertical', 28, '%'],
+                ['clock-horizontal', 'clockHorizontal', 50, '%'],
+                ['search-vertical', 'searchVertical', 48, '%'],
+                ['search-horizontal', 'searchHorizontal', 50, '%'],
+                ['links-vertical', 'linksVertical', 64, '%'],
+                ['links-horizontal', 'linksHorizontal', 50, '%'],
+                ['date-vertical', 'dateVertical', 95, '%'],
+                ['date-horizontal', 'dateHorizontal', 8, '%'],
+            ];
+
+            posConfigs.forEach(([id, key, defaultVal, unit]) => {
+                const el = $(`#${id}`);
+                const valEl = $(`#${id}-value`);
+                if (el) {
+                    const val = settings[key] ?? defaultVal;
+                    el.value = val;
+                    if (valEl) valEl.textContent = val + unit;
+                }
+            });
+
+            if ($('#show-date')) $('#show-date').checked = settings.showDate ?? true;
+        } catch (err) {
+            console.error('populateSettingsPanel error:', err);
+        }
     }
 
     function setBgTypeActive(type) {
         $$('.bg-type-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.bgType === type));
-        $('#bg-solid-options').classList.toggle('hidden', type !== 'solid');
-        $('#bg-gradient-options').classList.toggle('hidden', type !== 'gradient');
-        $('#bg-image-options').classList.toggle('hidden', type !== 'image');
+        const solid = $('#bg-solid-options');
+        const grad = $('#bg-gradient-options');
+        const img = $('#bg-image-options');
+        if (solid) solid.classList.toggle('hidden', type !== 'solid');
+        if (grad) grad.classList.toggle('hidden', type !== 'gradient');
+        if (img) img.classList.toggle('hidden', type !== 'image');
     }
 
     // ========================================
@@ -748,10 +796,15 @@
             closeModal('edit-link-modal');
         });
 
-        // Move link left / right
+        // Move link left / right (preserve inputs if edited)
         $('#move-link-left-btn').addEventListener('click', () => {
             const idx = parseInt($('#edit-link-index').value);
-            if (idx > 0) {
+            if (!isNaN(idx) && idx > 0 && settings.quickLinks[idx]) {
+                const currentName = $('#edit-link-name').value.trim();
+                const currentUrl = $('#edit-link-url').value.trim();
+                if (currentName) settings.quickLinks[idx].name = currentName;
+                if (currentUrl) settings.quickLinks[idx].url = currentUrl.startsWith('http') ? currentUrl : 'https://' + currentUrl;
+
                 const item = settings.quickLinks.splice(idx, 1)[0];
                 settings.quickLinks.splice(idx - 1, 0, item);
                 saveSettings();
@@ -763,7 +816,12 @@
 
         $('#move-link-right-btn').addEventListener('click', () => {
             const idx = parseInt($('#edit-link-index').value);
-            if (idx < settings.quickLinks.length - 1) {
+            if (!isNaN(idx) && idx < settings.quickLinks.length - 1 && settings.quickLinks[idx]) {
+                const currentName = $('#edit-link-name').value.trim();
+                const currentUrl = $('#edit-link-url').value.trim();
+                if (currentName) settings.quickLinks[idx].name = currentName;
+                if (currentUrl) settings.quickLinks[idx].url = currentUrl.startsWith('http') ? currentUrl : 'https://' + currentUrl;
+
                 const item = settings.quickLinks.splice(idx, 1)[0];
                 settings.quickLinks.splice(idx + 1, 0, item);
                 saveSettings();
@@ -797,10 +855,18 @@
         });
 
         // Settings button
-        DOM.settingsBtn.addEventListener('click', () => {
-            populateSettingsPanel();
-            openModal('settings-overlay');
-        });
+        if (DOM.settingsBtn) {
+            DOM.settingsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                    populateSettingsPanel();
+                } catch (err) {
+                    console.error('Settings populate error:', err);
+                }
+                openModal('settings-overlay');
+            });
+        }
 
         // Settings tabs
         $$('.settings-tab').forEach(tab => {
@@ -1068,7 +1134,7 @@
             if (confirm('Tüm ayarlar sıfırlanacak. Emin misiniz?')) {
                 localStorage.removeItem('newTabSettings');
                 await clearBgImageFromDB();
-                settings = { ...DEFAULTS };
+                settings = JSON.parse(JSON.stringify(DEFAULTS));
                 applyAllSettings();
                 populateSettingsPanel();
             }
@@ -1077,7 +1143,7 @@
         // Right edge detection for settings button
         let settingsTimeout = null;
         document.addEventListener('mousemove', (e) => {
-            const isNearRightEdge = e.clientX >= (window.innerWidth - 100);
+            const isNearRightEdge = e.clientX >= (window.innerWidth - 140);
             if (isNearRightEdge || (DOM.settingsBtn && DOM.settingsBtn.matches(':hover'))) {
                 if (DOM.settingsBtn) DOM.settingsBtn.classList.add('visible');
                 if (settingsTimeout) clearTimeout(settingsTimeout);
@@ -1087,7 +1153,7 @@
                     if (DOM.settingsBtn && !DOM.settingsBtn.matches(':hover')) {
                         DOM.settingsBtn.classList.remove('visible');
                     }
-                }, 350);
+                }, 600);
             }
         });
 
@@ -1159,16 +1225,28 @@
     // Color Utility Functions
     // ========================================
     function hexToRgba(hex, alpha) {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
+        if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return `rgba(26, 26, 46, ${alpha})`;
+        let cleanHex = hex.trim();
+        if (cleanHex.length === 4) {
+            cleanHex = '#' + cleanHex[1] + cleanHex[1] + cleanHex[2] + cleanHex[2] + cleanHex[3] + cleanHex[3];
+        }
+        if (cleanHex.length !== 7) return `rgba(26, 26, 46, ${alpha})`;
+        const r = parseInt(cleanHex.slice(1, 3), 16) || 0;
+        const g = parseInt(cleanHex.slice(3, 5), 16) || 0;
+        const b = parseInt(cleanHex.slice(5, 7), 16) || 0;
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     function darkenColor(hex, percent) {
-        const r = Math.max(0, parseInt(hex.slice(1, 3), 16) - Math.round(255 * percent / 100));
-        const g = Math.max(0, parseInt(hex.slice(3, 5), 16) - Math.round(255 * percent / 100));
-        const b = Math.max(0, parseInt(hex.slice(5, 7), 16) - Math.round(255 * percent / 100));
+        if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return '#5a52e0';
+        let cleanHex = hex.trim();
+        if (cleanHex.length === 4) {
+            cleanHex = '#' + cleanHex[1] + cleanHex[1] + cleanHex[2] + cleanHex[2] + cleanHex[3] + cleanHex[3];
+        }
+        if (cleanHex.length !== 7) return '#5a52e0';
+        const r = Math.max(0, (parseInt(cleanHex.slice(1, 3), 16) || 0) - Math.round(255 * percent / 100));
+        const g = Math.max(0, (parseInt(cleanHex.slice(3, 5), 16) || 0) - Math.round(255 * percent / 100));
+        const b = Math.max(0, (parseInt(cleanHex.slice(5, 7), 16) || 0) - Math.round(255 * percent / 100));
         return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
 

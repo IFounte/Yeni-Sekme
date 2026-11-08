@@ -373,23 +373,33 @@ body {
     position: absolute;
     top: 4px;
     right: 4px;
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.6);
-    border: none;
-    color: #fff;
-    font-size: 10px;
+    background: rgba(22, 22, 38, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 11px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transform: scale(0.85);
+    transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    z-index: 10;
 }
 
 .quick-link:hover .quick-link-edit {
     opacity: 1;
+    transform: scale(1);
+}
+
+.quick-link-edit:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
+    transform: scale(1.15);
 }
 
 /* Add Link Button */
@@ -443,7 +453,7 @@ body {
     position: fixed;
     top: 0;
     right: 0;
-    width: 90px;
+    width: 140px;
     height: 100vh;
     z-index: 40;
     pointer-events: auto;
@@ -465,9 +475,9 @@ body {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    transform: translateY(-50%) translateX(35px) scale(0.9);
+    transform: translateY(-50%) translateX(24px) scale(0.9);
     opacity: 0;
-    pointer-events: none;
+    pointer-events: auto;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     align-items: center;
@@ -477,9 +487,9 @@ body {
 #settings-hover-zone:hover ~ #settings-btn,
 #settings-btn:hover,
 #settings-btn.visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(-50%) translateX(0) scale(1);
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(-50%) translateX(0) scale(1) !important;
 }
 
 #settings-btn:hover {
@@ -491,6 +501,7 @@ body {
 
 #settings-btn i {
     transition: transform 0.4s ease;
+    pointer-events: none;
 }
 
 #settings-btn:hover i {
@@ -577,24 +588,40 @@ body {
 .modal-body {
     display: flex;
     flex-direction: column;
+    gap: 18px;
+}
+
 .reorder-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
+    padding: 12px 14px;
     background: rgba(255, 255, 255, 0.04);
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.reorder-row span {
+.reorder-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.reorder-label i {
+    color: var(--accent-color);
 }
 
 .reorder-btns {
     display: flex;
     gap: 8px;
+}
+
+.reorder-btns .btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
 }
 
 .modal-footer {
@@ -603,6 +630,10 @@ body {
     justify-content: space-between;
     margin-top: 24px;
     gap: 10px;
+}
+
+#link-modal .modal-footer {
+    justify-content: flex-end;
 }
 
 .modal-footer-right {
