@@ -43,10 +43,15 @@
         gradientDirection: 'to bottom',
         bgImage: null,
         bgImageOpacity: 100,
-        bgImageBlur: 0,
+        bgBlur: 0,
         fontFamily: "'Inter', sans-serif",
         clockSize: 96,
         clockWeight: '600',
+        greetingSize: 20,
+        searchScale: 100,
+        searchWidth: 560,
+        linksScale: 100,
+        dateSize: 15,
         showGreeting: true,
         timeFormat24: true,
         showSeconds: false,
@@ -59,10 +64,14 @@
         linkTextColor: '#c0c0d0',
         dateColor: '#a0a0b8',
         accentColor: '#6c63ff',
-        contentAlign: 'center',
-        clockPosition: 'above',
-        linksPosition: 'below-search',
-        searchWidth: 560,
+        clockVertical: 28,
+        clockHorizontal: 50,
+        searchVertical: 48,
+        searchHorizontal: 50,
+        linksVertical: 64,
+        linksHorizontal: 50,
+        dateVertical: 95,
+        dateHorizontal: 8,
         showDate: true,
         quickLinks: []
     };
@@ -346,36 +355,34 @@
     // Apply Settings to UI
     // ========================================
     function applyBackground() {
-        DOM.bgOverlay.style.backgroundImage = '';
-        DOM.bgOverlay.style.opacity = '';
-        DOM.bgOverlay.style.filter = '';
+        const blurVal = settings.bgBlur || 0;
+        DOM.bgOverlay.style.display = 'block';
+        DOM.bgOverlay.style.filter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+        DOM.bgOverlay.style.transform = blurVal > 0 ? 'scale(1.08)' : 'none';
 
         if (settings.bgType === 'solid') {
             DOM.body.style.background = settings.bgColor;
-            DOM.bgOverlay.style.display = 'none';
+            DOM.bgOverlay.style.background = settings.bgColor;
+            DOM.bgOverlay.style.backgroundImage = '';
+            DOM.bgOverlay.style.opacity = '1';
         } else if (settings.bgType === 'gradient') {
             const dir = settings.gradientDirection;
-            if (dir === 'circle') {
-                DOM.body.style.background = `radial-gradient(circle, ${settings.gradientStart}, ${settings.gradientEnd})`;
-            } else {
-                DOM.body.style.background = `linear-gradient(${dir}, ${settings.gradientStart}, ${settings.gradientEnd})`;
-            }
-            DOM.bgOverlay.style.display = 'none';
+            const grad = dir === 'circle'
+                ? `radial-gradient(circle, ${settings.gradientStart}, ${settings.gradientEnd})`
+                : `linear-gradient(${dir}, ${settings.gradientStart}, ${settings.gradientEnd})`;
+            DOM.body.style.background = settings.gradientStart;
+            DOM.bgOverlay.style.background = grad;
+            DOM.bgOverlay.style.backgroundImage = '';
+            DOM.bgOverlay.style.opacity = '1';
         } else if (settings.bgType === 'image' && settings.bgImage) {
             DOM.body.style.background = settings.bgColor;
-            DOM.bgOverlay.style.display = 'block';
-            DOM.bgOverlay.style.backgroundImage = `url(${settings.bgImage})`;
-            DOM.bgOverlay.style.opacity = settings.bgImageOpacity / 100;
-            DOM.bgOverlay.style.filter = `blur(${settings.bgImageBlur}px)`;
-            // Scale slightly to prevent blur edge artifacts
-            if (settings.bgImageBlur > 0) {
-                DOM.bgOverlay.style.transform = 'scale(1.05)';
-            } else {
-                DOM.bgOverlay.style.transform = '';
-            }
+            DOM.bgOverlay.style.background = `${settings.bgColor} url(${settings.bgImage}) center/cover no-repeat`;
+            DOM.bgOverlay.style.opacity = (settings.bgImageOpacity ?? 100) / 100;
         } else {
             DOM.body.style.background = settings.bgColor;
-            DOM.bgOverlay.style.display = 'none';
+            DOM.bgOverlay.style.background = settings.bgColor;
+            DOM.bgOverlay.style.backgroundImage = '';
+            DOM.bgOverlay.style.opacity = '1';
         }
     }
 
@@ -394,43 +401,37 @@
     }
 
     function applyFont() {
-        document.documentElement.style.setProperty('--font-family', settings.fontFamily);
-        document.documentElement.style.setProperty('--clock-size', settings.clockSize + 'px');
-        document.documentElement.style.setProperty('--clock-weight', settings.clockWeight);
+        const root = document.documentElement;
+        root.style.setProperty('--font-family', settings.fontFamily);
+        root.style.setProperty('--clock-size', (settings.clockSize || 96) + 'px');
+        root.style.setProperty('--clock-weight', settings.clockWeight || '600');
+        root.style.setProperty('--greeting-size', (settings.greetingSize || 20) + 'px');
+        root.style.setProperty('--search-scale', ((settings.searchScale || 100) / 100));
+        root.style.setProperty('--search-width', (settings.searchWidth || 560) + 'px');
+        root.style.setProperty('--links-scale', ((settings.linksScale || 100) / 100));
+        root.style.setProperty('--date-size', (settings.dateSize || 15) + 'px');
     }
 
     function applyLayout() {
-        DOM.mainContent.style.justifyContent = settings.contentAlign;
-
-        // Clock position
-        const searchContainer = DOM.searchContainer;
-        const clockContainer = DOM.clockContainer;
-        const linksContainer = DOM.quickLinksContainer;
-
-        if (settings.clockPosition === 'below') {
-            searchContainer.parentNode.insertBefore(searchContainer, clockContainer);
-        } else {
-            searchContainer.parentNode.insertBefore(clockContainer, searchContainer);
+        // Individual percentage-based vertical and horizontal positions
+        if (DOM.clockContainer) {
+            DOM.clockContainer.style.top = `${settings.clockVertical ?? 28}%`;
+            DOM.clockContainer.style.left = `${settings.clockHorizontal ?? 50}%`;
         }
-
-        // Links position
-        if (settings.linksPosition === 'bottom') {
-            linksContainer.style.position = 'fixed';
-            linksContainer.style.bottom = '60px';
-            linksContainer.style.left = '50%';
-            linksContainer.style.transform = 'translateX(-50%)';
-        } else {
-            linksContainer.style.position = '';
-            linksContainer.style.bottom = '';
-            linksContainer.style.left = '';
-            linksContainer.style.transform = '';
+        if (DOM.searchContainer) {
+            DOM.searchContainer.style.top = `${settings.searchVertical ?? 48}%`;
+            DOM.searchContainer.style.left = `${settings.searchHorizontal ?? 50}%`;
         }
-
-        // Search width
-        document.documentElement.style.setProperty('--search-width', settings.searchWidth + 'px');
-
-        // Date visibility
-        DOM.dateContainer.style.display = settings.showDate ? '' : 'none';
+        if (DOM.quickLinksContainer) {
+            DOM.quickLinksContainer.style.top = `${settings.linksVertical ?? 64}%`;
+            DOM.quickLinksContainer.style.left = `${settings.linksHorizontal ?? 50}%`;
+        }
+        if (DOM.dateContainer) {
+            DOM.dateContainer.style.top = `${settings.dateVertical ?? 95}%`;
+            DOM.dateContainer.style.left = `${settings.dateHorizontal ?? 8}%`;
+            DOM.dateContainer.style.bottom = 'auto';
+            DOM.dateContainer.style.display = settings.showDate ? '' : 'none';
+        }
     }
 
     function applyAllSettings() {
@@ -457,8 +458,10 @@
         $('#gradient-direction').value = settings.gradientDirection;
         $('#bg-image-opacity').value = settings.bgImageOpacity;
         $('#bg-image-opacity-value').textContent = settings.bgImageOpacity + '%';
-        $('#bg-image-blur').value = settings.bgImageBlur;
-        $('#bg-image-blur-value').textContent = settings.bgImageBlur + 'px';
+        if ($('#bg-blur')) {
+            $('#bg-blur').value = settings.bgBlur || 0;
+            $('#bg-blur-value').textContent = (settings.bgBlur || 0) + 'px';
+        }
 
         if (settings.bgImage) {
             $('#bg-preview-img').src = settings.bgImage;
@@ -466,10 +469,34 @@
             $('#file-upload-area').classList.add('hidden');
         }
 
+        // Sizes
+        if ($('#clock-size')) {
+            $('#clock-size').value = settings.clockSize || 96;
+            $('#clock-size-value').textContent = (settings.clockSize || 96) + 'px';
+        }
+        if ($('#greeting-size')) {
+            $('#greeting-size').value = settings.greetingSize || 20;
+            $('#greeting-size-value').textContent = (settings.greetingSize || 20) + 'px';
+        }
+        if ($('#search-scale')) {
+            $('#search-scale').value = settings.searchScale || 100;
+            $('#search-scale-value').textContent = '%' + (settings.searchScale || 100);
+        }
+        if ($('#search-width')) {
+            $('#search-width').value = settings.searchWidth || 560;
+            $('#search-width-value').textContent = (settings.searchWidth || 560) + 'px';
+        }
+        if ($('#links-scale')) {
+            $('#links-scale').value = settings.linksScale || 100;
+            $('#links-scale-value').textContent = '%' + (settings.linksScale || 100);
+        }
+        if ($('#date-size')) {
+            $('#date-size').value = settings.dateSize || 15;
+            $('#date-size-value').textContent = (settings.dateSize || 15) + 'px';
+        }
+
         // Font
         $('#font-family').value = settings.fontFamily;
-        $('#clock-size').value = settings.clockSize;
-        $('#clock-size-value').textContent = settings.clockSize + 'px';
         $('#clock-weight').value = settings.clockWeight;
         $('#show-greeting').checked = settings.showGreeting;
         $('#time-format-24').checked = settings.timeFormat24;
@@ -493,12 +520,28 @@
             $(`#${id}-text`).value = settings[key];
         });
 
-        // Layout
-        $('#content-align').value = settings.contentAlign;
-        $('#clock-position').value = settings.clockPosition;
-        $('#links-position').value = settings.linksPosition;
-        $('#search-width').value = settings.searchWidth;
-        $('#search-width-value').textContent = settings.searchWidth + 'px';
+        // Positions
+        const posConfigs = [
+            ['clock-vertical', 'clockVertical', 28, '%'],
+            ['clock-horizontal', 'clockHorizontal', 50, '%'],
+            ['search-vertical', 'searchVertical', 48, '%'],
+            ['search-horizontal', 'searchHorizontal', 50, '%'],
+            ['links-vertical', 'linksVertical', 64, '%'],
+            ['links-horizontal', 'linksHorizontal', 50, '%'],
+            ['date-vertical', 'dateVertical', 95, '%'],
+            ['date-horizontal', 'dateHorizontal', 8, '%'],
+        ];
+
+        posConfigs.forEach(([id, key, defaultVal, unit]) => {
+            const el = $(`#${id}`);
+            const valEl = $(`#${id}-value`);
+            if (el) {
+                const val = settings[key] ?? defaultVal;
+                el.value = val;
+                if (valEl) valEl.textContent = val + unit;
+            }
+        });
+
         $('#show-date').checked = settings.showDate;
     }
 
@@ -718,12 +761,14 @@
             saveSettings();
         });
 
-        $('#bg-image-blur').addEventListener('input', (e) => {
-            settings.bgImageBlur = parseInt(e.target.value);
-            $('#bg-image-blur-value').textContent = settings.bgImageBlur + 'px';
-            applyBackground();
-            saveSettings();
-        });
+        if ($('#bg-blur')) {
+            $('#bg-blur').addEventListener('input', (e) => {
+                settings.bgBlur = parseInt(e.target.value);
+                $('#bg-blur-value').textContent = settings.bgBlur + 'px';
+                applyBackground();
+                saveSettings();
+            });
+        }
 
         // Preset backgrounds
         $$('.preset-item').forEach(item => {
@@ -754,11 +799,28 @@
             saveSettings();
         });
 
-        $('#clock-size').addEventListener('input', (e) => {
-            settings.clockSize = parseInt(e.target.value);
-            $('#clock-size-value').textContent = settings.clockSize + 'px';
-            applyFont();
-            saveSettings();
+        // ---- Sizes settings ----
+        const sizeConfigs = [
+            ['clock-size', 'clockSize', 'px', false],
+            ['greeting-size', 'greetingSize', 'px', false],
+            ['search-scale', 'searchScale', '%', true],
+            ['search-width', 'searchWidth', 'px', false],
+            ['links-scale', 'linksScale', '%', true],
+            ['date-size', 'dateSize', 'px', false],
+        ];
+
+        sizeConfigs.forEach(([id, key, unit, prefixUnit]) => {
+            const input = $(`#${id}`);
+            const valEl = $(`#${id}-value`);
+            if (input) {
+                input.addEventListener('input', (e) => {
+                    const val = parseInt(e.target.value);
+                    settings[key] = val;
+                    if (valEl) valEl.textContent = prefixUnit ? (unit + val) : (val + unit);
+                    applyFont();
+                    saveSettings();
+                });
+            }
         });
 
         $('#clock-weight').addEventListener('change', (e) => {
@@ -817,30 +879,30 @@
             saveSettings();
         });
 
-        // ---- Layout settings ----
-        $('#content-align').addEventListener('change', (e) => {
-            settings.contentAlign = e.target.value;
-            applyLayout();
-            saveSettings();
-        });
+        // ---- Positions settings ----
+        const posInputConfigs = [
+            ['clock-vertical', 'clockVertical'],
+            ['clock-horizontal', 'clockHorizontal'],
+            ['search-vertical', 'searchVertical'],
+            ['search-horizontal', 'searchHorizontal'],
+            ['links-vertical', 'linksVertical'],
+            ['links-horizontal', 'linksHorizontal'],
+            ['date-vertical', 'dateVertical'],
+            ['date-horizontal', 'dateHorizontal'],
+        ];
 
-        $('#clock-position').addEventListener('change', (e) => {
-            settings.clockPosition = e.target.value;
-            applyLayout();
-            saveSettings();
-        });
-
-        $('#links-position').addEventListener('change', (e) => {
-            settings.linksPosition = e.target.value;
-            applyLayout();
-            saveSettings();
-        });
-
-        $('#search-width').addEventListener('input', (e) => {
-            settings.searchWidth = parseInt(e.target.value);
-            $('#search-width-value').textContent = settings.searchWidth + 'px';
-            applyLayout();
-            saveSettings();
+        posInputConfigs.forEach(([id, key]) => {
+            const input = $(`#${id}`);
+            const valEl = $(`#${id}-value`);
+            if (input) {
+                input.addEventListener('input', (e) => {
+                    const val = parseInt(e.target.value);
+                    settings[key] = val;
+                    if (valEl) valEl.textContent = `${val}%`;
+                    applyLayout();
+                    saveSettings();
+                });
+            }
         });
 
         $('#show-date').addEventListener('change', (e) => {

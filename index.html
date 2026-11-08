@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yeni Sekme</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -140,14 +141,17 @@
                 <button class="settings-tab active" data-tab="background">
                     <i class="fas fa-image"></i> Arka Plan
                 </button>
+                <button class="settings-tab" data-tab="sizes">
+                    <i class="fas fa-expand"></i> Boyutlar
+                </button>
+                <button class="settings-tab" data-tab="positions">
+                    <i class="fas fa-arrows-alt"></i> Konumlar
+                </button>
                 <button class="settings-tab" data-tab="fonts">
-                    <i class="fas fa-font"></i> Yazı Tipi
+                    <i class="fas fa-font"></i> Yazı & Saat
                 </button>
                 <button class="settings-tab" data-tab="colors">
                     <i class="fas fa-droplet"></i> Renkler
-                </button>
-                <button class="settings-tab" data-tab="layout">
-                    <i class="fas fa-grip"></i> Düzen
                 </button>
             </div>
 
@@ -219,12 +223,14 @@
                                 <span id="bg-image-opacity-value">100%</span>
                             </div>
                         </div>
-                        <div class="setting-sub-group">
-                            <label class="setting-label">Resim Karartma</label>
-                            <div class="range-row">
-                                <input type="range" id="bg-image-blur" min="0" max="20" value="0">
-                                <span id="bg-image-blur-value">0px</span>
-                            </div>
+                    </div>
+
+                    <!-- General Background Blur (all types) -->
+                    <div class="setting-group">
+                        <label class="setting-label">Arka Plan Bulanıklığı</label>
+                        <div class="range-row">
+                            <input type="range" id="bg-blur" min="0" max="30" value="0">
+                            <span id="bg-blur-value">0px</span>
                         </div>
                     </div>
 
@@ -261,13 +267,6 @@
                             <option value="'Fira Code', monospace">Fira Code</option>
                             <option value="system-ui, sans-serif">System UI</option>
                         </select>
-                    </div>
-                    <div class="setting-group">
-                        <label class="setting-label">Saat Boyutu</label>
-                        <div class="range-row">
-                            <input type="range" id="clock-size" min="40" max="160" value="96">
-                            <span id="clock-size-value">96px</span>
-                        </div>
                     </div>
                     <div class="setting-group">
                         <label class="setting-label">Saat Ağırlığı</label>
@@ -373,35 +372,107 @@
                     </button>
                 </div>
 
-                <!-- Layout Tab -->
-                <div class="settings-tab-content" id="tab-layout">
+                <!-- Sizes Tab -->
+                <div class="settings-tab-content" id="tab-sizes">
                     <div class="setting-group">
-                        <label class="setting-label">İçerik Hizalama</label>
-                        <select id="content-align">
-                            <option value="center" selected>Orta</option>
-                            <option value="flex-start">Üst</option>
-                            <option value="flex-end">Alt</option>
-                        </select>
+                        <label class="setting-label">Saat Boyutu</label>
+                        <div class="range-row">
+                            <input type="range" id="clock-size" min="40" max="180" value="96">
+                            <span id="clock-size-value">96px</span>
+                        </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Saat Konumu</label>
-                        <select id="clock-position">
-                            <option value="above" selected>Arama Üstünde</option>
-                            <option value="below">Arama Altında</option>
-                        </select>
+                        <label class="setting-label">Selamlama Metin Boyutu</label>
+                        <div class="range-row">
+                            <input type="range" id="greeting-size" min="12" max="36" value="20">
+                            <span id="greeting-size-value">20px</span>
+                        </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Hızlı Erişimler Konumu</label>
-                        <select id="links-position">
-                            <option value="below-search" selected>Aramanın Altında</option>
-                            <option value="bottom">Sayfanın Altında</option>
-                        </select>
+                        <label class="setting-label">Arama Çubuğu Boyutu (Ölçek)</label>
+                        <div class="range-row">
+                            <input type="range" id="search-scale" min="60" max="150" value="100">
+                            <span id="search-scale-value">%100</span>
+                        </div>
                     </div>
                     <div class="setting-group">
                         <label class="setting-label">Arama Çubuğu Genişliği</label>
                         <div class="range-row">
-                            <input type="range" id="search-width" min="300" max="800" value="560">
+                            <input type="range" id="search-width" min="300" max="900" value="560">
                             <span id="search-width-value">560px</span>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Hızlı Erişim Linkleri Boyutu</label>
+                        <div class="range-row">
+                            <input type="range" id="links-scale" min="60" max="150" value="100">
+                            <span id="links-scale-value">%100</span>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Tarih Metin Boyutu</label>
+                        <div class="range-row">
+                            <input type="range" id="date-size" min="10" max="30" value="15">
+                            <span id="date-size-value">15px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Positions Tab -->
+                <div class="settings-tab-content" id="tab-positions">
+                    <div class="setting-group">
+                        <label class="setting-label"><strong><i class="fas fa-clock"></i> Saat Konumu</strong></label>
+                        <div class="range-row">
+                            <label class="color-sub-label">Dikey</label>
+                            <input type="range" id="clock-vertical" min="5" max="95" value="28">
+                            <span id="clock-vertical-value">28%</span>
+                        </div>
+                        <div class="range-row">
+                            <label class="color-sub-label">Yatay</label>
+                            <input type="range" id="clock-horizontal" min="5" max="95" value="50">
+                            <span id="clock-horizontal-value">50%</span>
+                        </div>
+                    </div>
+                    <hr class="setting-divider">
+                    <div class="setting-group">
+                        <label class="setting-label"><strong><i class="fas fa-search"></i> Arama Çubuğu Konumu</strong></label>
+                        <div class="range-row">
+                            <label class="color-sub-label">Dikey</label>
+                            <input type="range" id="search-vertical" min="5" max="95" value="48">
+                            <span id="search-vertical-value">48%</span>
+                        </div>
+                        <div class="range-row">
+                            <label class="color-sub-label">Yatay</label>
+                            <input type="range" id="search-horizontal" min="5" max="95" value="50">
+                            <span id="search-horizontal-value">50%</span>
+                        </div>
+                    </div>
+                    <hr class="setting-divider">
+                    <div class="setting-group">
+                        <label class="setting-label"><strong><i class="fas fa-th"></i> Hızlı Erişimler Konumu</strong></label>
+                        <div class="range-row">
+                            <label class="color-sub-label">Dikey</label>
+                            <input type="range" id="links-vertical" min="5" max="95" value="64">
+                            <span id="links-vertical-value">64%</span>
+                        </div>
+                        <div class="range-row">
+                            <label class="color-sub-label">Yatay</label>
+                            <input type="range" id="links-horizontal" min="5" max="95" value="50">
+                            <span id="links-horizontal-value">50%</span>
+                        </div>
+                    </div>
+                    <hr class="setting-divider">
+                    <div class="setting-group">
+                        <label class="setting-label"><strong><i class="fas fa-calendar-alt"></i> Tarih Konumu</strong></label>
+                        <div class="range-row">
+                            <label class="color-sub-label">Dikey</label>
+                            <input type="range" id="date-vertical" min="5" max="98" value="95">
+                            <span id="date-vertical-value">95%</span>
+                        </div>
+                        <div class="range-row">
+                            <label class="color-sub-label">Yatay</label>
+                            <input type="range" id="date-horizontal" min="2" max="98" value="8">
+                            <span id="date-horizontal-value">8%</span>
                         </div>
                     </div>
                     <div class="setting-group">
