@@ -313,12 +313,30 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     transition: all 0.25s ease;
-    cursor: pointer;
+    cursor: grab;
     min-width: 90px;
     position: relative;
 }
 
-.quick-link:hover {
+.quick-link:active {
+    cursor: grabbing;
+}
+
+.quick-link.dragging {
+    opacity: 0.35;
+    transform: scale(0.92);
+    border: 2px dashed var(--accent-color);
+    box-shadow: none;
+}
+
+.quick-link.drag-over {
+    transform: scale(1.08) translateY(-4px);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+    background: rgba(108, 99, 255, 0.15);
+}
+
+.quick-link:hover:not(.dragging) {
     background: rgba(255, 255, 255, 0.1);
     transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
@@ -559,7 +577,24 @@ body {
 .modal-body {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+.reorder-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.reorder-row span {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.reorder-btns {
+    display: flex;
+    gap: 8px;
 }
 
 .modal-footer {

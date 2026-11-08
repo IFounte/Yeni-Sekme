@@ -310,6 +310,9 @@
         }
     }
 
+    let draggedIndex = null;
+    let isDraggingLink = false;
+
     function renderQuickLinks() {
         DOM.quickLinks.innerHTML = '';
         settings.quickLinks.forEach((link, index) => {
@@ -317,6 +320,59 @@
             el.className = 'quick-link';
             el.href = link.url;
             el.title = link.name;
+            el.draggable = true;
+            el.dataset.index = index;
+
+            // Drag & Drop for reordering
+            el.addEventListener('dragstart', (e) => {
+                draggedIndex = index;
+                isDraggingLink = true;
+                el.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', index);
+            });
+
+            el.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+
+            el.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                if (draggedIndex !== null && draggedIndex !== index) {
+                    el.classList.add('drag-over');
+                }
+            });
+
+            el.addEventListener('dragleave', () => {
+                el.classList.remove('drag-over');
+            });
+
+            el.addEventListener('drop', (e) => {
+                e.preventDefault();
+                el.classList.remove('drag-over');
+                if (draggedIndex !== null && draggedIndex !== index) {
+                    const item = settings.quickLinks.splice(draggedIndex, 1)[0];
+                    settings.quickLinks.splice(index, 0, item);
+                    saveSettings();
+                    renderQuickLinks();
+                }
+            });
+
+            el.addEventListener('dragend', () => {
+                el.classList.remove('dragging');
+                $$('.quick-link').forEach(q => q.classList.remove('drag-over'));
+                draggedIndex = null;
+                setTimeout(() => {
+                    isDraggingLink = false;
+                }, 80);
+            });
+
+            el.addEventListener('click', (e) => {
+                if (isDraggingLink) {
+                    e.preventDefault();
+                }
+            });
 
             const iconDiv = document.createElement('div');
             iconDiv.className = 'quick-link-icon';
@@ -400,11 +456,27 @@
         }
     }
 
+    function updateMoveButtons(index) {
+        const leftBtn = $('#move-link-left-btn');
+        const rightBtn = $('#move-link-right-btn');
+        if (leftBtn) {
+            leftBtn.disabled = (index <= 0);
+            leftBtn.style.opacity = (index <= 0) ? '0.35' : '1';
+            leftBtn.style.pointerEvents = (index <= 0) ? 'none' : 'auto';
+        }
+        if (rightBtn) {
+            rightBtn.disabled = (index >= settings.quickLinks.length - 1);
+            rightBtn.style.opacity = (index >= settings.quickLinks.length - 1) ? '0.35' : '1';
+            rightBtn.style.pointerEvents = (index >= settings.quickLinks.length - 1) ? 'none' : 'auto';
+        }
+    }
+
     function openEditLinkModal(index) {
         const link = settings.quickLinks[index];
         $('#edit-link-name').value = link.name;
         $('#edit-link-url').value = link.url;
         $('#edit-link-index').value = index;
+        updateMoveButtons(index);
         openModal('edit-link-modal');
     }
 
@@ -674,6 +746,31 @@
             const index = parseInt($('#edit-link-index').value);
             deleteQuickLink(index);
             closeModal('edit-link-modal');
+        });
+
+        // Move link left / right
+        $('#move-link-left-btn').addEventListener('click', () => {
+            const idx = parseInt($('#edit-link-index').value);
+            if (idx > 0) {
+                const item = settings.quickLinks.splice(idx, 1)[0];
+                settings.quickLinks.splice(idx - 1, 0, item);
+                saveSettings();
+                renderQuickLinks();
+                $('#edit-link-index').value = idx - 1;
+                updateMoveButtons(idx - 1);
+            }
+        });
+
+        $('#move-link-right-btn').addEventListener('click', () => {
+            const idx = parseInt($('#edit-link-index').value);
+            if (idx < settings.quickLinks.length - 1) {
+                const item = settings.quickLinks.splice(idx, 1)[0];
+                settings.quickLinks.splice(idx + 1, 0, item);
+                saveSettings();
+                renderQuickLinks();
+                $('#edit-link-index').value = idx + 1;
+                updateMoveButtons(idx + 1);
+            }
         });
 
         // Modal close buttons
