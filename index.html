@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni Sekme</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- Background Overlay -->
+    <div id="bg-overlay"></div>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Clock -->
+        <div id="clock-container" class="draggable-section" data-section="clock">
+            <div id="clock"></div>
+            <div id="greeting"></div>
+        </div>
+
+        <!-- Search Bar -->
+        <div id="search-container" class="draggable-section" data-section="search">
+            <div id="search-wrapper">
+                <div id="engine-selector">
+                    <button id="engine-btn" title="Arama motorunu değiştir">
+                        <img id="engine-icon" src="" alt="Search Engine">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="engine-dropdown">
+                        <div class="engine-option" data-engine="google">
+                            <img src="https://www.google.com/favicon.ico" alt="Google">
+                            <span>Google</span>
+                        </div>
+                        <div class="engine-option" data-engine="brave">
+                            <img src="https://brave.com/static-assets/images/brave-favicon.png" alt="Brave">
+                            <span>Brave</span>
+                        </div>
+                        <div class="engine-option" data-engine="bing">
+                            <img src="https://www.bing.com/favicon.ico" alt="Bing">
+                            <span>Bing</span>
+                        </div>
+                        <div class="engine-option" data-engine="yandex">
+                            <img src="https://yandex.com/favicon.ico" alt="Yandex">
+                            <span>Yandex</span>
+                        </div>
+                    </div>
+                </div>
+                <input type="text" id="search-input" placeholder="Ara veya URL gir..." autocomplete="off" autofocus>
+                <button id="search-btn" title="Ara">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Access Links -->
+        <div id="quick-links-container" class="draggable-section" data-section="links">
+            <div id="quick-links"></div>
+            <button id="add-link-btn" title="Hızlı erişim linki ekle">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Date (Bottom Left) -->
+    <div id="date-container">
+        <div id="date"></div>
+    </div>
+
+    <!-- Settings Button (Bottom Right) -->
+    <button id="settings-btn" title="Özelleştir">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- Add Link Modal -->
+    <div id="link-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-link"></i> Hızlı Erişim Ekle</h3>
+                <button class="modal-close" data-modal="link-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="link-name">İsim</label>
+                    <input type="text" id="link-name" placeholder="Örn: YouTube">
+                </div>
+                <div class="form-group">
+                    <label for="link-url">URL</label>
+                    <input type="url" id="link-url" placeholder="Örn: https://youtube.com">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal="link-modal">İptal</button>
+                <button class="btn btn-primary" id="save-link-btn">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Link Modal -->
+    <div id="edit-link-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Linki Düzenle</h3>
+                <button class="modal-close" data-modal="edit-link-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit-link-name">İsim</label>
+                    <input type="text" id="edit-link-name" placeholder="Örn: YouTube">
+                </div>
+                <div class="form-group">
+                    <label for="edit-link-url">URL</label>
+                    <input type="url" id="edit-link-url" placeholder="Örn: https://youtube.com">
+                </div>
+                <input type="hidden" id="edit-link-index">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="delete-link-btn"><i class="fas fa-trash"></i> Sil</button>
+                <div class="modal-footer-right">
+                    <button class="btn btn-secondary" data-modal="edit-link-modal">İptal</button>
+                    <button class="btn btn-primary" id="update-link-btn">Güncelle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div id="settings-overlay" class="modal-overlay">
+        <div id="settings-panel">
+            <div class="settings-header">
+                <h2><i class="fas fa-palette"></i> Özelleştir</h2>
+                <button class="modal-close" data-modal="settings-overlay"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Settings Tabs -->
+            <div class="settings-tabs">
+                <button class="settings-tab active" data-tab="background">
+                    <i class="fas fa-image"></i> Arka Plan
+                </button>
+                <button class="settings-tab" data-tab="fonts">
+                    <i class="fas fa-font"></i> Yazı Tipi
+                </button>
+                <button class="settings-tab" data-tab="colors">
+                    <i class="fas fa-droplet"></i> Renkler
+                </button>
+                <button class="settings-tab" data-tab="layout">
+                    <i class="fas fa-grip"></i> Düzen
+                </button>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="settings-content">
+                <!-- Background Tab -->
+                <div class="settings-tab-content active" id="tab-background">
+                    <div class="setting-group">
+                        <label class="setting-label">Arka Plan Türü</label>
+                        <div class="bg-type-selector">
+                            <button class="bg-type-btn active" data-bg-type="solid">Düz Renk</button>
+                            <button class="bg-type-btn" data-bg-type="gradient">Gradyan</button>
+                            <button class="bg-type-btn" data-bg-type="image">Resim</button>
+                        </div>
+                    </div>
+
+                    <!-- Solid Color -->
+                    <div class="setting-group bg-option" id="bg-solid-options">
+                        <label class="setting-label">Arka Plan Rengi</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="bg-color" value="#0a0a1a">
+                            <input type="text" class="color-text" id="bg-color-text" value="#0a0a1a">
+                        </div>
+                    </div>
+
+                    <!-- Gradient -->
+                    <div class="setting-group bg-option hidden" id="bg-gradient-options">
+                        <label class="setting-label">Gradyan Renkleri</label>
+                        <div class="color-picker-row">
+                            <label class="color-sub-label">Başlangıç</label>
+                            <input type="color" id="gradient-start" value="#0a0a1a">
+                            <input type="text" class="color-text" id="gradient-start-text" value="#0a0a1a">
+                        </div>
+                        <div class="color-picker-row">
+                            <label class="color-sub-label">Bitiş</label>
+                            <input type="color" id="gradient-end" value="#1a1a3e">
+                            <input type="text" class="color-text" id="gradient-end-text" value="#1a1a3e">
+                        </div>
+                        <div class="setting-sub-group">
+                            <label class="setting-label">Gradyan Yönü</label>
+                            <select id="gradient-direction">
+                                <option value="to bottom">Yukarıdan Aşağıya</option>
+                                <option value="to right">Soldan Sağa</option>
+                                <option value="to bottom right">Çapraz (Sağ Alt)</option>
+                                <option value="to bottom left">Çapraz (Sol Alt)</option>
+                                <option value="circle">Dairesel</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Image -->
+                    <div class="setting-group bg-option hidden" id="bg-image-options">
+                        <label class="setting-label">Bilgisayardan Resim Seç</label>
+                        <div class="file-upload-area" id="file-upload-area">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Resim seçmek için tıklayın veya sürükleyin</p>
+                            <input type="file" id="bg-image-input" accept="image/*">
+                        </div>
+                        <div id="bg-image-preview" class="hidden">
+                            <img id="bg-preview-img" src="" alt="Preview">
+                            <button id="remove-bg-image" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i> Resmi Kaldır
+                            </button>
+                        </div>
+                        <div class="setting-sub-group">
+                            <label class="setting-label">Resim Opaklığı</label>
+                            <div class="range-row">
+                                <input type="range" id="bg-image-opacity" min="0" max="100" value="100">
+                                <span id="bg-image-opacity-value">100%</span>
+                            </div>
+                        </div>
+                        <div class="setting-sub-group">
+                            <label class="setting-label">Resim Karartma</label>
+                            <div class="range-row">
+                                <input type="range" id="bg-image-blur" min="0" max="20" value="0">
+                                <span id="bg-image-blur-value">0px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preset Backgrounds -->
+                    <div class="setting-group">
+                        <label class="setting-label">Hazır Arka Planlar</label>
+                        <div class="preset-grid" id="preset-backgrounds">
+                            <div class="preset-item" data-preset="gradient" data-start="#0f0c29" data-end="#302b63" data-dir="to bottom right" style="background: linear-gradient(to bottom right, #0f0c29, #302b63)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#000428" data-end="#004e92" data-dir="to bottom" style="background: linear-gradient(to bottom, #000428, #004e92)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#1a1a2e" data-end="#16213e" data-dir="to bottom" style="background: linear-gradient(to bottom, #1a1a2e, #16213e)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#2c3e50" data-end="#3498db" data-dir="to bottom right" style="background: linear-gradient(to bottom right, #2c3e50, #3498db)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#141e30" data-end="#243b55" data-dir="to bottom" style="background: linear-gradient(to bottom, #141e30, #243b55)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#0f2027" data-end="#2c5364" data-dir="to bottom right" style="background: linear-gradient(to bottom right, #0f2027, #2c5364)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#232526" data-end="#414345" data-dir="to bottom" style="background: linear-gradient(to bottom, #232526, #414345)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#1f1c2c" data-end="#928dab" data-dir="to bottom right" style="background: linear-gradient(to bottom right, #1f1c2c, #928dab)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#e53935" data-end="#e35d5b" data-dir="to bottom right" style="background: linear-gradient(to bottom right, #e53935, #e35d5b)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#1d976c" data-end="#93f9b9" data-dir="to bottom right" style="background: linear-gradient(to bottom right, #1d976c, #93f9b9)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#c94b4b" data-end="#4b134f" data-dir="to bottom right" style="background: linear-gradient(to bottom right, #c94b4b, #4b134f)"></div>
+                            <div class="preset-item" data-preset="gradient" data-start="#f12711" data-end="#f5af19" data-dir="to bottom right" style="background: linear-gradient(to bottom right, #f12711, #f5af19)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fonts Tab -->
+                <div class="settings-tab-content" id="tab-fonts">
+                    <div class="setting-group">
+                        <label class="setting-label">Yazı Tipi</label>
+                        <select id="font-family">
+                            <option value="'Inter', sans-serif">Inter</option>
+                            <option value="'Poppins', sans-serif">Poppins</option>
+                            <option value="'Roboto', sans-serif">Roboto</option>
+                            <option value="'Montserrat', sans-serif">Montserrat</option>
+                            <option value="'Open Sans', sans-serif">Open Sans</option>
+                            <option value="'Fira Code', monospace">Fira Code</option>
+                            <option value="system-ui, sans-serif">System UI</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Saat Boyutu</label>
+                        <div class="range-row">
+                            <input type="range" id="clock-size" min="40" max="160" value="96">
+                            <span id="clock-size-value">96px</span>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Saat Ağırlığı</label>
+                        <select id="clock-weight">
+                            <option value="300">İnce (300)</option>
+                            <option value="400">Normal (400)</option>
+                            <option value="500">Orta (500)</option>
+                            <option value="600" selected>Yarı Kalın (600)</option>
+                            <option value="700">Kalın (700)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Selamlama Mesajı Göster</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-greeting" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">24 Saat Formatı</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="time-format-24" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Saniyeleri Göster</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-seconds">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Colors Tab -->
+                <div class="settings-tab-content" id="tab-colors">
+                    <div class="setting-group">
+                        <label class="setting-label">Saat Rengi</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="clock-color" value="#ffffff">
+                            <input type="text" class="color-text" id="clock-color-text" value="#ffffff">
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Selamlama Rengi</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="greeting-color" value="#a0a0b8">
+                            <input type="text" class="color-text" id="greeting-color-text" value="#a0a0b8">
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Arama Çubuğu Arka Plan</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="search-bg-color" value="#1a1a2e">
+                            <input type="text" class="color-text" id="search-bg-color-text" value="#1a1a2e">
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Arama Çubuğu Kenarlık</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="search-border-color" value="#2a2a4a">
+                            <input type="text" class="color-text" id="search-border-color-text" value="#2a2a4a">
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Arama Yazı Rengi</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="search-text-color" value="#e0e0e8">
+                            <input type="text" class="color-text" id="search-text-color-text" value="#e0e0e8">
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Hızlı Erişim Arka Plan</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="link-bg-color" value="#1a1a2e">
+                            <input type="text" class="color-text" id="link-bg-color-text" value="#1a1a2e">
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Hızlı Erişim Yazı Rengi</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="link-text-color" value="#c0c0d0">
+                            <input type="text" class="color-text" id="link-text-color-text" value="#c0c0d0">
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Tarih Rengi</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="date-color" value="#a0a0b8">
+                            <input type="text" class="color-text" id="date-color-text" value="#a0a0b8">
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Vurgu Rengi</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="accent-color" value="#6c63ff">
+                            <input type="text" class="color-text" id="accent-color-text" value="#6c63ff">
+                        </div>
+                    </div>
+                    <hr class="setting-divider">
+                    <button class="btn btn-secondary btn-full" id="reset-colors-btn">
+                        <i class="fas fa-undo"></i> Renkleri Sıfırla
+                    </button>
+                </div>
+
+                <!-- Layout Tab -->
+                <div class="settings-tab-content" id="tab-layout">
+                    <div class="setting-group">
+                        <label class="setting-label">İçerik Hizalama</label>
+                        <select id="content-align">
+                            <option value="center" selected>Orta</option>
+                            <option value="flex-start">Üst</option>
+                            <option value="flex-end">Alt</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Saat Konumu</label>
+                        <select id="clock-position">
+                            <option value="above" selected>Arama Üstünde</option>
+                            <option value="below">Arama Altında</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Hızlı Erişimler Konumu</label>
+                        <select id="links-position">
+                            <option value="below-search" selected>Aramanın Altında</option>
+                            <option value="bottom">Sayfanın Altında</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Arama Çubuğu Genişliği</label>
+                        <div class="range-row">
+                            <input type="range" id="search-width" min="300" max="800" value="560">
+                            <span id="search-width-value">560px</span>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">Tarihi Göster</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-date" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <hr class="setting-divider">
+                    <button class="btn btn-danger btn-full" id="reset-all-btn">
+                        <i class="fas fa-trash-alt"></i> Tüm Ayarları Sıfırla
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
